@@ -1,0 +1,240 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package inttreeproject;
+
+import java.util.NoSuchElementException;
+import java.util.Random;
+
+/**
+ *
+ * @author LUPEI20
+ */
+public class IntTree {
+        IntTreeNode root;
+        Random r = new Random();
+        public IntTree()
+        {
+            root = null;
+        }
+        public IntTree(int height)
+        {
+            root = FillNode(height,1);
+        }
+        public void print() {
+            print(root);
+            System.out.println(); // end the line of output
+        }
+        private void print(IntTreeNode CurrentR) {
+            if(CurrentR != null) {
+                print(CurrentR.left);//this will follow the natural order
+                System.out.print(CurrentR.value + " ");
+                print(CurrentR.right);
+            }
+        }
+        private IntTreeNode FillNode(int height, int currentHeight)
+        {
+            if(currentHeight==height)
+            {
+                return new IntTreeNode(r.nextInt(10) + 3,null,null);
+            }else
+            {
+                return new IntTreeNode(r.nextInt(10) + 3,FillNode(height, currentHeight+1),FillNode(height, currentHeight+1));
+            }
+        }
+        public void printSide()
+        {
+            printSideWay(root,"");
+        }
+        private void printSideWay(IntTreeNode rootNode, String indent)//determines the level of the triangle
+        {
+                if(rootNode != null)
+                {
+                    printSideWay(rootNode.right,indent + "   ");
+                    System.out.println(indent + rootNode.value);
+                    printSideWay(rootNode.left,indent + "   ");
+                }
+        }
+        public boolean containsNode(int value)
+        {
+            return contains(root, value);       
+        }
+        private boolean contains(IntTreeNode root, int value)
+        {
+            if(root==null){
+                return false;
+            }else if(root.value == value){
+                return true;
+            }else if(root.value > value){
+                return contains(root.left,value);
+            }else{
+                return contains(root.right,value);
+            }
+        }
+        public void add(int value)
+        {
+            addNode(root, value);
+        }
+        private IntTreeNode addNode(IntTreeNode root, int value)
+        {
+            if(root == null)
+            {
+                root = new IntTreeNode(value);
+            }else if(root.value>value)
+            {
+                root.left = addNode(root.left, value);
+            }else if(root.value<value)
+            {
+                root.right = addNode(root.right, value);
+            }
+            return root;
+        }
+        
+        public int findMin()
+        {
+            if(root == null)  
+            {
+                throw new NoSuchElementException();
+            }else
+            {
+               return min(root);
+            }
+        }
+        private int min(IntTreeNode root)
+        {
+            if(root.left == null)
+            {
+                return root.left.value;
+            }else
+            {
+                return min(root.left);
+            }
+        }
+        public void remove(int value)
+        {
+            root = removeItem(root, value);
+        }
+        private IntTreeNode removeItem(IntTreeNode root, int value)
+        {
+            if(root == null)
+            {
+                return null;
+            }else if(root.value > value)//searching process
+            {
+                root.left = removeItem(root.left, value);
+            }else if(root.value < value)
+            {
+                root.right = removeItem(root.right, value);
+            }else
+            {
+                if(root.right == null)
+                {
+                    return root.left;
+                }else if(root.left == null)
+                {
+                    return root.right;
+                }else
+                {
+                    int newMin = min(root.right);//search in the right tree because the values are bigger than the ones on the left.
+                    root.value = newMin;//set the root to this new value
+                    root.right = removeItem(root.right, newMin);// this is to check is there 
+                }  
+            }
+            return root;//for connecting the next node with the current node.
+        }
+        int count = 0;
+        public int countEBranches(IntTreeNode root)
+        {
+            return countEvenBranches(root);
+        }
+        private int countEvenBranches(IntTreeNode root)
+        {
+            if(root == null)
+            {
+                return 0;
+            }else
+            {
+                if(root.value % 2 == 0)
+                {
+                    count++;
+                }
+                if(root.left != null)
+                {
+                    if(root.left.left != null|| root.left.right != null)
+                    {
+                        countEvenBranches(root.left);
+                    }
+                }
+                if(root.right != null)
+                {
+                    if(root.right.left != null|| root.right.right != null)
+                    {
+                        countEvenBranches(root.right);
+                    }
+                }
+            }
+            return count;
+        }
+        public String toString()
+        {
+            return toString(root);
+        }
+        private String toString(IntTreeNode currentNode)
+        {
+            String current = "";
+            if(currentNode == null)
+            {
+                current = "there is no node in this binary tree";
+            }else
+            {
+                current = current + currentNode.value;
+                if(currentNode.left != null || currentNode.right != null)
+                {
+                    current += toString(currentNode.left);//get the values on the left side of the root
+                    current += toString(currentNode.right);
+                }
+            }
+            return current;
+        }
+        //copy the current binary Tree
+        public IntTree copy()
+        {
+            IntTree second = new IntTree(3);
+            copyTree(root, second.root);
+            return second;
+        }
+        private void copyTree(IntTreeNode rootFirst, IntTreeNode rootSecond)
+        {
+            if(rootFirst == null)
+            {
+                rootSecond = null;
+            }else
+            {
+                rootSecond.value = rootFirst.value;
+                rootSecond.left = rootFirst.left;
+                rootSecond.right = rootFirst.right;
+                
+                //then repeat the process for the left and right sub-nodes of the root
+                copyTree(rootFirst.left, rootSecond.left);
+                copyTree(rootFirst.right,rootSecond.right);
+            }
+        }
+        private class IntTreeNode
+    {
+        int value;
+        IntTreeNode left;
+        IntTreeNode right;
+        public IntTreeNode(int value)
+        {
+            this(value,null,null);
+        }
+        public IntTreeNode(int value, IntTreeNode left, IntTreeNode right)
+        {
+            this.value = value;
+            this.left = left;
+            this.right = right;
+        }
+    }
+}
